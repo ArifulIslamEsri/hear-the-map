@@ -398,6 +398,10 @@ $("placeSel").addEventListener("change", async e => {
 });
 $("placeSel").innerHTML = Object.entries(PLACES).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join("");
 
+// ---------- Debug handle ----------
+// Open the app with ?debug to inspect the view and state from the browser console.
+if (new URLSearchParams(location.search).has("debug")) window.hearTheMap = { view, state, quakes, elevation, audio };
+
 // ---------- Boot ----------
 view.when(async () => {
   refreshSampler();
