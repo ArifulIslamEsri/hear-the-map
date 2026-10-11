@@ -81,8 +81,8 @@ npm test         # unit tests for the sonification math
 npm run build    # production build in dist/
 ```
 
-Pushing to `main` deploys to GitHub Pages through `.github/workflows/deploy.yml`.
-(In the repo, go to Settings → Pages → Source and choose **GitHub Actions**.)
+Deployed on **Vercel**: every push to `main` builds with `npm run build` and publishes `dist/`.
+GitHub Actions runs the unit tests and a production build on every push (`.github/workflows/ci.yml`).
 
 ## Ideas for next
 
