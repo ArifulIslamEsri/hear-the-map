@@ -3,6 +3,8 @@
 **Explore terrain and earthquakes by sound.** An accessibility experiment built with the
 [ArcGIS Maps SDK for JavaScript](https://developers.arcgis.com/javascript/latest/) 5.1.
 
+**▶ Live demo: [hear-the-map.vercel.app](https://hear-the-map.vercel.app)** (headphones recommended)
+
 Put on headphones and move across the map:
 
 | You hear | It means |

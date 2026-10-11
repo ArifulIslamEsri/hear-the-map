@@ -203,6 +203,7 @@ reactiveUtils.when(() => view.stationary, async () => {
 const SWEEP_SAMPLES = 64, SWEEP_SECONDS = 3.2;
 const sweepGraphic = new Graphic({ symbol: { type: "simple-line", color: [255, 214, 10, 0.9], width: 2, style: "short-dash" } });
 const headGraphic = new Graphic({ symbol: { type: "simple-marker", color: [255, 214, 10, 1], size: 12, outline: { color: "white", width: 1.5 } } });
+let sweepTimer = 0, sweepCleanup = 0;
 
 async function sweep() {
   if (!audio.ready) return;
@@ -238,19 +239,27 @@ async function sweep() {
     }
   });
 
+  // Move the playhead with a timer rather than requestAnimationFrame, which browsers
+  // pause in background panes; the clean-up below always runs, even if frames are skipped.
+  clearInterval(sweepTimer); clearTimeout(sweepCleanup);
   const start = performance.now();
   const head = $("playhead");
-  (function frame(now) {
-    const t = Math.min(1, (now - start) / 1000 / SWEEP_SECONDS);
+  const tick = () => {
+    const t = Math.min(1, (performance.now() - start) / 1000 / SWEEP_SECONDS);
     const idx = Math.min(SWEEP_SAMPLES - 1, Math.floor(t * SWEEP_SAMPLES));
     headGraphic.geometry = new Point({ x: pts[idx].x, y: pts[idx].y, spatialReference: view.spatialReference });
-    head.setAttribute("x1", 6 + t * 588); head.setAttribute("x2", 6 + t * 588);
-    if (t < 1) requestAnimationFrame(frame);
-    else setTimeout(() => view.graphics.removeMany([sweepGraphic, headGraphic]), 600);
-  })(start);
+    head?.setAttribute("x1", 6 + t * 588); head?.setAttribute("x2", 6 + t * 588);
+    if (t >= 1) clearInterval(sweepTimer);
+  };
+  tick();
+  sweepTimer = setInterval(tick, 33);
+  sweepCleanup = setTimeout(() => {
+    clearInterval(sweepTimer);
+    view.graphics.removeMany([sweepGraphic, headGraphic]);
+    setStatus("Sweep complete.");
+  }, SWEEP_SECONDS * 1000 + 600);
 
   announce(`Profile across the view, west to east. ${summary}`);
-  setStatus("Sweep complete.");
 }
 
 function drawProfile(zs, hi, lo) {
@@ -271,7 +280,8 @@ function drawProfile(zs, hi, lo) {
 
 // ---------- Earthquake sonar ----------
 const ringGraphic = new Graphic({ symbol: { type: "simple-fill", color: [255, 92, 160, 0.08], outline: { color: [255, 92, 160, 0.9], width: 1.5 } } });
-let highlight = null;
+let highlight = null, ringTimer = 0;
+const MAX_PINGS = 30; // play the nearest quakes only, so the echo stays readable
 
 function sonarRadiusKm() {
   const l = view.toMap({ x: 0, y: view.height / 2 }), r = view.toMap({ x: view.width, y: view.height / 2 });
@@ -285,7 +295,8 @@ async function quakeSonar(at) {
 
   ringGraphic.geometry = new Circle({ center, radius: radiusKm, radiusUnit: "kilometers", geodesic: true });
   view.graphics.add(ringGraphic);
-  setTimeout(() => view.graphics.remove(ringGraphic), 1800);
+  clearTimeout(ringTimer);
+  ringTimer = setTimeout(() => view.graphics.remove(ringGraphic), 1800);
 
   let feats = [];
   try {
@@ -297,11 +308,12 @@ async function quakeSonar(at) {
   } catch (err) { console.warn(err); }
 
   const lat = center.latitude, lon = center.longitude;
-  const qs = feats.map(f => {
+  const all = feats.map(f => {
     const g = f.geometry, a = f.attributes;
     const distanceKm = haversineKm(lat, lon, g.latitude, g.longitude);
     return { f, distanceKm, bearing: bearingDeg(lat, lon, g.latitude, g.longitude), mag: a.mag, depthKm: a.depth, place: a.place };
-  }).sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 30);
+  }).sort((a, b) => a.distanceKm - b.distanceKm);
+  const qs = all.slice(0, MAX_PINGS);
 
   audio.sonarSend();
   qs.forEach(q => {
@@ -318,9 +330,11 @@ async function quakeSonar(at) {
     announce(`Sonar: no earthquakes in the past 30 days within ${r} kilometers.`);
     return;
   }
-  const big = qs.reduce((a, b) => ((b.mag ?? 0) > (a.mag ?? 0) ? b : a));
-  ui.quake.textContent = `${qs.length} within ${r} km · strongest M${big.mag?.toFixed(1)}`;
-  announce(`Sonar: ${qs.length} earthquake${qs.length > 1 ? "s" : ""} within ${r} kilometers. ` +
+  const big = all.reduce((a, b) => ((b.mag ?? 0) > (a.mag ?? 0) ? b : a));
+  const n = all.length.toLocaleString("en-US");
+  const played = all.length > MAX_PINGS ? ` Playing the nearest ${MAX_PINGS}.` : "";
+  ui.quake.textContent = `${n} within ${r} km · strongest M${big.mag?.toFixed(1)}`;
+  announce(`Sonar: ${n} earthquake${all.length > 1 ? "s" : ""} within ${r} kilometers.${played} ` +
     `Strongest magnitude ${big.mag?.toFixed(1)}, ${Math.round(big.distanceKm)} kilometers ${compassWord(big.bearing)}, ` +
     `${Math.round(big.depthKm ?? 0)} kilometers deep${big.place ? `, ${big.place}` : ""}.`);
 }
@@ -328,7 +342,11 @@ async function quakeSonar(at) {
 // ---------- Spoken summary of the listening point ----------
 async function speakHere() {
   const p = state.listenPoint ?? view.center;
-  const z = await elevationAt(p);
+  let z = await elevationAt(p);
+  if (z === undefined) { // a hover query was in flight; ask directly
+    try { z = (await elevation.queryElevation(p, { noDataValue: NO_DATA })).geometry.z; if (z === NO_DATA) z = NaN; }
+    catch { z = NaN; }
+  }
   const where = `${Math.abs(p.latitude).toFixed(2)} degrees ${p.latitude >= 0 ? "north" : "south"}, ${Math.abs(p.longitude).toFixed(2)} degrees ${p.longitude >= 0 ? "east" : "west"}`;
   announce(`${where}. ${isWater(z) ? "Water or sea level." : `Elevation ${fmtM(z)}.`}`);
 }
@@ -339,6 +357,7 @@ async function ensureAudio() {
   if (audio.ready) return;
   await audio.start();
   $("app").classList.add("listening");
+  setStatus("Listening. Move over the map.");
   announce("Listening. Move the pointer, or use the arrow keys to pan. Press Space for a profile sweep, Q for earthquake sonar, S to hear where you are, H for help.");
 }
 $("startBtn").addEventListener("click", async () => {
@@ -384,7 +403,7 @@ view.when(async () => {
   refreshSampler();
   state.quakeView = await view.whenLayerView(quakes);
   await reactiveUtils.whenOnce(() => !state.quakeView.updating);
-  setStatus("Ready. Press Start listening.");
+  setStatus(audio.ready ? "Listening. Move over the map." : "Ready. Press Start listening.");
 }).catch(err => { console.error(err); setStatus("The map failed to load. Check your connection."); });
 
 drawProfile(Array(SWEEP_SAMPLES).fill(0), null, null);

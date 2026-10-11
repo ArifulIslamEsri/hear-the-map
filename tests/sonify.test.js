@@ -100,3 +100,10 @@ describe("profile summary", () => {
     expect(d.summary).toMatch(/25% of the line is at or below sea level/);
   });
 });
+
+describe("spoken heights", () => {
+  it("says below sea level instead of a negative number", () => {
+    const d = describeProfile([120, -86, 300]);
+    expect(d.summary).toMatch(/Lowest 86 m below sea level/);
+  });
+});

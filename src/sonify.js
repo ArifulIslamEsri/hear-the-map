@@ -108,8 +108,13 @@ export function describeProfile(elevations) {
   const waterPart = water ? ` ${Math.round((100 * water) / elevations.length)}% of the line is at or below sea level.` : "";
   return {
     hi, lo,
-    summary: `Highest ${fmtM(hi.e)} near ${where(hi.i)}. Lowest ${fmtM(lo.e)} near ${where(lo.i)}.${waterPart}`
+    summary: `Highest ${fmtHeight(hi.e)} near ${where(hi.i)}. Lowest ${fmtHeight(lo.e)} near ${where(lo.i)}.${waterPart}`
   };
+}
+
+/** Height for spoken summaries: "86 m below sea level" instead of "-86 m". */
+export function fmtHeight(m) {
+  return Number.isFinite(m) && m < 0 ? `${fmtM(-m)} below sea level` : fmtM(m);
 }
 
 export function fmtM(m) {
