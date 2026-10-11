@@ -38,7 +38,7 @@ const PLACES = {
   alaska:   { label: "Alaska and the Aleutian arc", center: [-152, 60], zoom: 5 }
 };
 
-// ---------- DOM ----------
+// dom
 const $ = id => document.getElementById(id);
 const live = $("live");
 const ui = {
@@ -46,7 +46,7 @@ const ui = {
   quake: $("rQuake"), status: $("status"), profile: $("profileSvg"), profileText: $("profileText")
 };
 
-// ---------- Map ----------
+// map
 const elevation = new ElevationLayer({ url: ELEVATION_URL });
 
 const quakes = new FeatureLayer({
@@ -92,7 +92,7 @@ const state = {
   lastInput: "pointer"
 };
 
-// ---------- Announcements (screen readers + optional speech) ----------
+// announcements (screen readers + optional speech)
 function announce(text) {
   live.textContent = "";
   // Re-set on the next frame so repeated identical messages are still read.
@@ -107,9 +107,9 @@ function announce(text) {
 
 function setStatus(text) { ui.status.textContent = text; }
 
-// ---------- Elevation ----------
+// elevation
 // When the view stops moving, build an ElevationSampler for the visible extent.
-// After that, every hover lookup is a synchronous read from memory: no requests.
+// Hover lookups after that are synchronous, no requests.
 async function refreshSampler() {
   if (!view.ready || !view.extent) return;
   state.samplerAbort?.abort();
@@ -175,7 +175,7 @@ async function listenAt(mapPoint, screenPoint) {
   return z;
 }
 
-// ---------- Pointer listening ----------
+// pointer listening
 view.on("pointer-move", e => {
   if (!audio.ready) return;
   state.lastInput = "pointer";
@@ -199,7 +199,7 @@ reactiveUtils.when(() => view.stationary, async () => {
   }
 });
 
-// ---------- Profile sweep: hear the whole view left to right ----------
+// profile sweep: hear the whole view left to right
 const SWEEP_SAMPLES = 64, SWEEP_SECONDS = 3.2;
 const sweepGraphic = new Graphic({ symbol: { type: "simple-line", color: [255, 214, 10, 0.9], width: 2, style: "short-dash" } });
 const headGraphic = new Graphic({ symbol: { type: "simple-marker", color: [255, 214, 10, 1], size: 12, outline: { color: "white", width: 1.5 } } });
@@ -239,8 +239,8 @@ async function sweep() {
     }
   });
 
-  // Move the playhead with a timer rather than requestAnimationFrame, which browsers
-  // pause in background panes; the clean-up below always runs, even if frames are skipped.
+  // setInterval instead of requestAnimationFrame: rAF pauses in background tabs and the
+  // sweep line used to get stuck on the map. The timeout below always cleans up.
   clearInterval(sweepTimer); clearTimeout(sweepCleanup);
   const start = performance.now();
   const head = $("playhead");
@@ -278,7 +278,7 @@ function drawProfile(zs, hi, lo) {
     <line id="playhead" x1="${pad}" x2="${pad}" y1="0" y2="${H}" class="p-head"/>`;
 }
 
-// ---------- Earthquake sonar ----------
+// earthquake sonar
 const ringGraphic = new Graphic({ symbol: { type: "simple-fill", color: [255, 92, 160, 0.08], outline: { color: [255, 92, 160, 0.9], width: 1.5 } } });
 let highlight = null, ringTimer = 0;
 const MAX_PINGS = 30; // play the nearest quakes only, so the echo stays readable
@@ -339,7 +339,7 @@ async function quakeSonar(at) {
     `${Math.round(big.depthKm ?? 0)} kilometers deep${big.place ? `, ${big.place}` : ""}.`);
 }
 
-// ---------- Spoken summary of the listening point ----------
+// spoken summary of the listening point
 async function speakHere() {
   const p = state.listenPoint ?? view.center;
   let z = await elevationAt(p);
@@ -351,7 +351,7 @@ async function speakHere() {
   announce(`${where}. ${isWater(z) ? "Water or sea level." : `Elevation ${fmtM(z)}.`}`);
 }
 
-// ---------- Controls ----------
+// controls
 const startDlg = $("startDlg");
 async function ensureAudio() {
   if (audio.ready) return;
@@ -400,11 +400,11 @@ $("placeSel").addEventListener("change", async e => {
 });
 $("placeSel").innerHTML = Object.entries(PLACES).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join("");
 
-// ---------- Debug handle ----------
+// debug handle
 // Open the app with ?debug to inspect the view and state from the browser console.
 if (new URLSearchParams(location.search).has("debug")) window.hearTheMap = { view, state, quakes, elevation, audio };
 
-// ---------- Boot ----------
+// boot
 view.when(async () => {
   refreshSampler();
   state.quakeView = await view.whenLayerView(quakes);

@@ -1,5 +1,4 @@
-// Pure mapping functions: data -> sound parameters.
-// No DOM, no Web Audio, no SDK imports, so they are easy to unit test.
+// data -> sound parameters. No DOM / Web Audio / SDK imports so it's easy to test.
 
 export const SEA_LEVEL_EPSILON = 0.5; // metres; at or below this we play "water"
 export const MAX_LAND_M = 6000;       // elevations above this map to the top note
@@ -92,8 +91,8 @@ export function quakeToPing({ distanceKm, bearing, mag, depthKm }, radiusKm, max
 }
 
 /**
- * Elevations sampled left->right across the view -> a profile to play.
- * Returns per-sample frequencies plus a plain-language summary.
+ * Elevations sampled left->right across the view.
+ * Returns the highest and lowest samples and a short summary sentence.
  */
 export function describeProfile(elevations) {
   const valid = elevations.map((e, i) => ({ e, i })).filter(d => Number.isFinite(d.e));

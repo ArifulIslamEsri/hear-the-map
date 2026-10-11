@@ -1,4 +1,4 @@
-/* Instrument panel over a hillshade map. High contrast first: this is an accessibility project. */
+/* high contrast on purpose, this is an accessibility project */
 :root {
   --bg: #0d1117;
   --panel: #131a22;
