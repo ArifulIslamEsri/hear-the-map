@@ -1,0 +1,22 @@
+{
+  "name": "hear-the-map",
+  "version": "1.0.0",
+  "description": "Explore terrain and earthquakes by sound with the ArcGIS Maps SDK for JavaScript.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "author": "Ariful Islam",
+  "license": "MIT",
+  "dependencies": {
+    "@arcgis/core": "5.1.26"
+  },
+  "devDependencies": {
+    "vite": "6.3.5",
+    "vitest": "3.1.4"
+  },
+  "type": "module",
+  "private": true
+}

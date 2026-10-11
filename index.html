@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hear the Map · ArcGIS Maps SDK for JavaScript</title>
+  <meta name="description" content="Explore terrain and earthquakes by sound. An accessibility experiment built with the ArcGIS Maps SDK for JavaScript.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap">
+</head>
+<body>
+  <a class="skip" href="#viewDiv">Skip to map</a>
+  <div id="app">
+    <main id="viewDiv" aria-label="Map. Pan with arrow keys. The crosshair in the center is your listening point."></main>
+    <div class="crosshair" aria-hidden="true"></div>
+
+    <aside class="panel" aria-label="Sound controls">
+      <header>
+        <h1>Hear the Map</h1>
+        <p class="sub">Terrain and earthquakes, as sound</p>
+      </header>
+
+      <label class="field">Go to
+        <select id="placeSel"></select>
+      </label>
+
+      <dl class="readout" aria-label="What you are hearing">
+        <div><dt>Elevation</dt><dd id="rElev">–</dd></div>
+        <div><dt>Pitch</dt><dd id="rNote">–</dd></div>
+        <div><dt>Stereo</dt><dd id="rPan">–</dd></div>
+        <div><dt>Location</dt><dd id="rCoord">–</dd></div>
+        <div class="wide"><dt>Quake sonar</dt><dd id="rQuake">click the map or press Q</dd></div>
+      </dl>
+
+      <div class="actions">
+        <button data-action="sweep"><span>Profile sweep</span><kbd>Space</kbd></button>
+        <button data-action="sonar"><span>Quake sonar</span><kbd>Q</kbd></button>
+        <button data-action="speak"><span>Where am I?</span><kbd>S</kbd></button>
+        <button data-action="musical" id="musicBtn" aria-pressed="false"><span>Musical scale</span><kbd>L</kbd></button>
+        <button data-action="voice" id="voiceBtn" aria-pressed="false"><span>Read aloud</span><kbd>V</kbd></button>
+        <button data-action="mute" id="muteBtn" aria-pressed="false"><span>Mute</span><kbd>M</kbd></button>
+      </div>
+
+      <figure class="profile">
+        <figcaption>Last sweep, west → east</figcaption>
+        <svg id="profileSvg" viewBox="0 0 600 120" role="img" aria-labelledby="profileText"></svg>
+        <p id="profileText">Press Space to sweep across the view.</p>
+      </figure>
+
+      <p class="status" id="status" role="status">Loading map…</p>
+      <button class="link" data-action="help">Keyboard help <kbd>H</kbd></button>
+    </aside>
+  </div>
+
+  <div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog id="startDlg" aria-labelledby="startTitle">
+    <h2 id="startTitle">Hear the Map</h2>
+    <p>Explore the world by ear. Put on headphones: left and right matter.</p>
+    <ul>
+      <li><b>Pitch is height.</b> Low notes are lowlands, high notes are mountains.</li>
+      <li><b>Waves are water.</b> At or below sea level you hear a soft wash.</li>
+      <li><b>Pings are earthquakes.</b> Closer ones echo back first; louder means stronger; brighter means shallower.</li>
+    </ul>
+    <button id="startBtn" class="primary" autofocus>Start listening</button>
+  </dialog>
+
+  <dialog id="helpDlg" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">Keyboard</h2>
+    <table>
+      <tr><th scope="row"><kbd>Arrow keys</kbd></th><td>Pan the map. The center is your listening point.</td></tr>
+      <tr><th scope="row"><kbd>+</kbd> <kbd>-</kbd></th><td>Zoom in and out</td></tr>
+      <tr><th scope="row"><kbd>Space</kbd></th><td>Profile sweep: hear the whole view west to east</td></tr>
+      <tr><th scope="row"><kbd>Q</kbd></th><td>Earthquake sonar around the listening point</td></tr>
+      <tr><th scope="row"><kbd>S</kbd></th><td>Say where I am and the elevation</td></tr>
+      <tr><th scope="row"><kbd>L</kbd></th><td>Snap pitch to a musical scale</td></tr>
+      <tr><th scope="row"><kbd>V</kbd></th><td>Read announcements aloud</td></tr>
+      <tr><th scope="row"><kbd>M</kbd></th><td>Mute</td></tr>
+    </table>
+    <form method="dialog"><button class="primary">Close</button></form>
+  </dialog>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
