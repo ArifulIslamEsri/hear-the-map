@@ -371,14 +371,16 @@ const actions = {
   mute: () => { audio.setMuted(!audio.muted); $("muteBtn").setAttribute("aria-pressed", audio.muted); announce(audio.muted ? "Muted." : "Sound on."); },
   musical: () => { state.musical = !state.musical; $("musicBtn").setAttribute("aria-pressed", state.musical); announce(state.musical ? "Musical scale on." : "Continuous pitch."); },
   voice: () => { state.speak = !state.speak; $("voiceBtn").setAttribute("aria-pressed", state.speak); announce(state.speak ? "Voice on." : "Voice off."); },
-  help: () => $("helpDlg").showModal()
+  help: () => $("helpDlg").showModal(),
+  about: () => $("aboutDlg").showModal()
 };
+const NEEDS_AUDIO = action => action !== "help" && action !== "about";
 document.querySelectorAll("[data-action]").forEach(b => b.addEventListener("click", async () => {
-  if (b.dataset.action !== "help") await ensureAudio();
+  if (NEEDS_AUDIO(b.dataset.action)) await ensureAudio();
   actions[b.dataset.action]();
 }));
 
-const KEYS = { " ": "sweep", p: "sweep", q: "sonar", s: "speak", m: "mute", l: "musical", v: "voice", h: "help", "?": "help" };
+const KEYS = { " ": "sweep", p: "sweep", q: "sonar", s: "speak", m: "mute", l: "musical", v: "voice", h: "help", "?": "help", a: "about" };
 window.addEventListener("keydown", async e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest?.("input, select, textarea, dialog[open]")) return;
@@ -386,7 +388,7 @@ window.addEventListener("keydown", async e => {
   const act = KEYS[e.key.toLowerCase()];
   if (!act) return;
   e.preventDefault();
-  if (act !== "help") await ensureAudio();
+  if (NEEDS_AUDIO(act)) await ensureAudio();
   actions[act]();
 });
 

@@ -57,6 +57,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 .p-head { stroke: var(--text); stroke-width: 1; stroke-dasharray: 3 3; }
 
 .status { margin: 0; font-size: 14px; color: var(--dim); }
+.links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
 .link { align-self: flex-start; background: none; border: 0; color: var(--text); text-decoration: underline; padding: 0; display: inline-flex; gap: 8px; align-items: center; }
 
 dialog { max-width: min(520px, calc(100vw - 32px)); background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
@@ -65,6 +66,13 @@ dialog h2 { margin: 0 0 8px; font-size: 26px; }
 dialog ul { padding-left: 18px; display: grid; gap: 8px; }
 dialog table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; }
 dialog th, dialog td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; font-weight: 400; }
+dialog h3 { margin: 18px 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--signal); }
+dialog p { margin: 0 0 8px; line-height: 1.55; }
+.about-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 16px 0 !important; color: var(--dim); }
+.about-links a { color: var(--text); }
+.dlg-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.secondary { background: none; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 11px 16px; font-size: 15px; }
+.secondary:hover { border-color: var(--dim); }
 .primary { background: var(--signal); color: #111; border: 0; border-radius: 8px; padding: 12px 20px; font-weight: 700; font-size: 16px; }
 
 .skip { position: absolute; left: -999px; top: 8px; z-index: 10; background: var(--signal); color: #111; padding: 8px 12px; }

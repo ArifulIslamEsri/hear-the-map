@@ -49,7 +49,10 @@
       </figure>
 
       <p class="status" id="status" role="status">Loading map…</p>
-      <button class="link" data-action="help">Keyboard help <kbd>H</kbd></button>
+      <div class="links">
+        <button class="link" data-action="about">About this project <kbd>A</kbd></button>
+        <button class="link" data-action="help">Keyboard help <kbd>H</kbd></button>
+      </div>
     </aside>
   </div>
 
@@ -63,7 +66,33 @@
       <li><b>Waves are water.</b> At or below sea level you hear a soft wash.</li>
       <li><b>Pings are earthquakes.</b> Closer ones echo back first; louder means stronger; brighter means shallower.</li>
     </ul>
-    <button id="startBtn" class="primary" autofocus>Start listening</button>
+    <div class="dlg-actions">
+      <button id="startBtn" class="primary" autofocus>Start listening</button>
+      <button class="secondary" data-action="about">About this project</button>
+    </div>
+  </dialog>
+
+  <dialog id="aboutDlg" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">About Hear the Map</h2>
+    <h3>What it is</h3>
+    <p>A map you can explore with your ears. Height becomes pitch, water becomes a soft wash, left and right
+      follow the map, and recent earthquakes answer back like sonar. Every sound also comes with words for
+      screen readers.</p>
+    <h3>Why it matters</h3>
+    <p>About 43 million people worldwide are blind, and 295 million more have moderate or severe vision
+      impairment. For them, a web map is usually a blank rectangle with a one-line description. A description
+      tells you a map exists. Sound lets you explore it yourself: find the valley, follow a ridge, hear where
+      the land meets the sea.</p>
+    <h3>What's new</h3>
+    <p>Map sonification has been tried before, in research prototypes and in specialist map viewers. This
+      project shows how to do it directly inside the ArcGIS Maps SDK for JavaScript, with live terrain and
+      live data, as open source that any developer can add to their own maps. Once the map settles,
+      listening makes no network requests at all.</p>
+    <p class="about-links">
+      <a href="https://github.com/ArifulIslamEsri/hear-the-map" target="_blank" rel="noopener">Code, sources and details on GitHub</a>
+      <span>Built by Ariful Islam</span>
+    </p>
+    <form method="dialog"><button class="primary">Close</button></form>
   </dialog>
 
   <dialog id="helpDlg" aria-labelledby="helpTitle">
@@ -77,6 +106,7 @@
       <tr><th scope="row"><kbd>L</kbd></th><td>Snap pitch to a musical scale</td></tr>
       <tr><th scope="row"><kbd>V</kbd></th><td>Read announcements aloud</td></tr>
       <tr><th scope="row"><kbd>M</kbd></th><td>Mute</td></tr>
+      <tr><th scope="row"><kbd>A</kbd></th><td>About this project</td></tr>
     </table>
     <form method="dialog"><button class="primary">Close</button></form>
   </dialog>
